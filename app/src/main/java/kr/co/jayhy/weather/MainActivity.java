@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         presenter = new MainPresenter();
         presenter.setView(this);
 
-        presenter.loadItem();
+//        presenter.loadItem();
 
     }
 
