@@ -194,12 +194,27 @@ public class WeatherItem {
 
             item.setMain(getIconMain(strIcon));
 
-            if(repo.rain.rain == null || repo.rain.rain.equals("") ||
-                    repo.rain.rain.equals(null) || repo.rain.rain.length() == 0) {
-                item.setRain("0,0");
+            if(repo.rain != null) {
+                if(repo.rain.rain == null) {
+                    item.setRain("0.0");
+                } else {
+                    if(repo.rain.rain.length() > 0) {
+                        item.setRain(repo.rain.rain);
+                    } else {
+                        item.setRain("0.0");
+                    }
+                }
             } else {
-                item.setRain(repo.rain.rain);
+                item.setRain("0.0");
             }
+
+
+//            if(repo.rain.rain == null || repo.rain.rain.equals("") ||
+//                    repo.rain.rain.equals(null) || repo.rain.rain.length() == 0) {
+//                item.setRain("0,0");
+//            } else {
+//                item.setRain(repo.rain.rain);
+//            }
 
         } catch (Exception e) {
             Log.d(TAG, "getCurrentItem Exception : " + e.toString());
@@ -223,6 +238,10 @@ public class WeatherItem {
 
             String dtDate = Util.convertUTCtoLocalDate(Long.parseLong(list.dt));
 
+            /**
+             * 현재 시간이면 유지
+             * 다른 시간 이면 한번 표시
+             */
             if(prevDate.equals("")) {
                 item.setDt_date(dtDate);
                 prevDate = dtDate;

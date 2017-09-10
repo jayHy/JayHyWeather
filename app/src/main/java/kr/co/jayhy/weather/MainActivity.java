@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -29,7 +30,7 @@ import kr.co.jayhy.weather.listener.MyWeatherCallback;
 import kr.co.jayhy.weather.presenter.MainPresenter;
 import kr.co.jayhy.weather.realm.RealmManager;
 import kr.co.jayhy.weather.realm.object.WeatherObject;
-import kr.co.jayhy.weather.recycler.MainRecyclerAdapter;
+import kr.co.jayhy.weather.recycler.CurrentRecyclerAdapter;
 import kr.co.jayhy.weather.repo.WeatherCurrentRepo;
 import kr.co.jayhy.weather.repo.WeatherForecastRepo;
 import kr.co.jayhy.weather.thread.WeatherCurrentThread;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     private ActivityMainBinding binding;
 
-    private MainRecyclerAdapter recyclerAdapter = null;
+    private CurrentRecyclerAdapter recyclerAdapter = null;
     private ArrayList<WeatherItem> weatherItems;
 
     private MainContract.Presenter presenter;
@@ -79,8 +80,18 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         binding.foreRecycler.setLayoutManager(layoutManager);
 
         weatherItems = new ArrayList<>();
-        recyclerAdapter = new MainRecyclerAdapter(this, weatherItems);
+        recyclerAdapter = new CurrentRecyclerAdapter(this, weatherItems);
         binding.foreRecycler.setAdapter(recyclerAdapter);
+
+        binding.swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                getMyWeather();
+
+                binding.swipeLayout.setRefreshing(false);
+            }
+        });
 
         checkCurrnetData();
 
@@ -164,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             WeatherItem item = new WeatherItem(context);
             item = item.getCurrentItem(repo);
 
+            Log.d(TAG, "setWeatherStatus item ==> " + item);
+
             WeatherObject object = new WeatherObject();
             object.setDt(item.getDt());
             object.setTemp(item.getTemp());
@@ -189,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
                     .into(binding.imgIcon);
 
             binding.weather.setText(item.getMain());
-            binding.rain.setText(getString(R.string.rainfall) + item.getRain() + "mm");
+            binding.rain.setText(item.getRain() + " " + "mm");
 
             if(RealmManager.getInstance_WeatherDao().current_count() > 0) {
                 RealmManager.getInstance_WeatherDao().current_remove(new WeatherObject());
